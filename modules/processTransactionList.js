@@ -13,10 +13,6 @@ function processTransactionList(transactionList = []) {
     resultList.push({ id, customer_id, accepted });
 
   transactionList.forEach((transaction, i) => {
-    if (i === 50) {
-      console.log(transaction);
-    }
-
     if (transaction.load_amount > DAILY_AMOUNT_LIMIT) {
       pushResult(false, transaction);
       return;
@@ -46,7 +42,7 @@ function processTransactionList(transactionList = []) {
     }
 
     const weekStartIndex = previousTransactionsForCustomer.findIndex(
-      x => transaction.time - x.time <= MILLISECONDS_PER_WEEK
+      x => transaction.time - x.time < MILLISECONDS_PER_WEEK
     );
 
     if (weekStartIndex < 0) {
@@ -71,7 +67,7 @@ function processTransactionList(transactionList = []) {
     }
 
     const dayStartIndex = customerTransactionsInLastWeek.findIndex(
-      x => transaction.time - x.time <= MILLISECONDS_PER_DAY
+      x => transaction.time - x.time < MILLISECONDS_PER_DAY
     );
 
     const customerTransactionsInLastDay = customerTransactionsInLastWeek.slice(

@@ -7,6 +7,10 @@ function parseTransactionsFile(filePath) {
     transactions
       .split('\n')
       .map((transactionString, i) => {
+        if (!transactionString) {
+          return null;
+        }
+
         let transaction;
         try {
           transaction = JSON.parse(transactionString);
@@ -22,7 +26,11 @@ function parseTransactionsFile(filePath) {
         transaction.load_amount = parseFloat(
           transaction.load_amount.replace('$', '')
         );
-        transaction.time = Date.parse(transaction.time);
+
+        const date = new Date(transaction.time);
+        date.setUTCHours(0, 0, 0, 0);
+        transaction.time = date.getTime();
+        
         return transaction;
       })
       .filter(x => x)
