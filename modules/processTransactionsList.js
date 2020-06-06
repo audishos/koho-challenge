@@ -7,24 +7,32 @@ const {
 } = require('./constants');
 
 function processLoadEvents(transactionList = []) {
-  return transactionList.map((transaction, i) => {
-    const result = {
-      id: transaction.id,
-      customer_id: transaction.customer_id,
-      accepted: 'false',
-    };
+  const resultList = [];
+
+  const pushResult = (accepted, { id, customer_id }) =>
+    resultList.push({ id, customer_id, accepted });
+
+  transactionList.forEach((transaction, i) => {
+    if (i === 43) {
+      console.log(transaction);
+    }
 
     if (transaction.load_amount > DAILY_AMOUNT_LIMIT) {
-      return result;
+      pushResult(false, transaction);
+      return;
     }
 
     const previousTransactionsForCustomer = transactionList
       .slice(0, i || 1 - 1)
-      .filter(x => x.customer_id === transaction.customer_id);
+      .filter(
+        (x, i) =>
+          x.customer_id === transaction.customer_id &&
+          resultList[i].accepted === true
+      );
 
     if (previousTransactionsForCustomer.length < 1) {
-      result.accepted = 'true';
-      return result;
+      pushResult(true, transaction);
+      return;
     }
 
     if (
@@ -33,12 +41,18 @@ function processLoadEvents(transactionList = []) {
         transaction
       )
     ) {
-      return result;
+      pushResult(false, transaction);
+      return;
     }
 
     const weekStartIndex = previousTransactionsForCustomer.findIndex(
       x => transaction.time - x.time <= MILLISECONDS_PER_WEEK
     );
+
+    if (weekStartIndex < 0) {
+      pushResult(true, transaction);
+      return;
+    }
 
     const customerTransactionsInLastWeek = previousTransactionsForCustomer.slice(
       weekStartIndex,
@@ -52,7 +66,8 @@ function processLoadEvents(transactionList = []) {
         WEEKLY_AMOUNT_LIMIT
       )
     ) {
-      return result;
+      pushResult(false, transaction);
+      return;
     }
 
     const dayStartIndex = customerTransactionsInLastWeek.findIndex(
@@ -64,8 +79,14 @@ function processLoadEvents(transactionList = []) {
       i - 1
     );
 
+    if (dayStartIndex < 0) {
+      pushResult(true, transaction);
+      return;
+    }
+
     if (customerTransactionsInLastDay.length + 1 > DAILY_LOAD_COUNT_LIMIT) {
-      return result;
+      pushResult(false, transaction);
+      return;
     }
 
     if (
@@ -75,12 +96,14 @@ function processLoadEvents(transactionList = []) {
         DAILY_AMOUNT_LIMIT
       )
     ) {
-      return result;
+      pushResult(false, transaction);
+      return;
     }
 
-    result.accepted = 'true';
-    return result;
+    pushResult(true, transaction);
   });
+
+  return resultList;
 }
 
 module.exports = processLoadEvents;
