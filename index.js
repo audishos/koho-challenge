@@ -1,10 +1,10 @@
 const path = require('path');
-const parseFundsFile = require('./modules/parseFundsFile');
-const processLoadEvents = require('./modules/processLoadEvents');
+const parseTransactionsFile = require('./modules/parseTransactionsFile');
+const processTransactionsList = require('./modules/processTransactionsList');
 
-const fundList = parseFundsFile(
+const transactionList = parseTransactionsFile(
   path.resolve(__dirname, './takehome/input.txt')
 );
 
-const resultsList = processLoadEvents(fundList);
-console.log(resultsList);
+const resultList = processTransactionsList(transactionList);
+console.log(resultList);

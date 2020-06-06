@@ -83,6 +83,8 @@ function processLoadEvents(transactionList = []) {
   });
 }
 
+module.exports = processLoadEvents;
+
 function getIsTransactionAlreadyPosted(
   previousTransactionList,
   currentTransaction
@@ -105,5 +107,3 @@ function getIsLoadAmountLimitExceeded(
 function getTotalAmount(total, transaction) {
   return total + transaction.load_amount;
 }
-
-module.exports = processLoadEvents;
