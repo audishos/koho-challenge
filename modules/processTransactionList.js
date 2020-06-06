@@ -6,14 +6,14 @@ const {
   MILLISECONDS_PER_WEEK,
 } = require('./constants');
 
-function processLoadEvents(transactionList = []) {
+function processTransactionList(transactionList = []) {
   const resultList = [];
 
   const pushResult = (accepted, { id, customer_id }) =>
     resultList.push({ id, customer_id, accepted });
 
   transactionList.forEach((transaction, i) => {
-    if (i === 43) {
+    if (i === 50) {
       console.log(transaction);
     }
 
@@ -106,7 +106,7 @@ function processLoadEvents(transactionList = []) {
   return resultList;
 }
 
-module.exports = processLoadEvents;
+module.exports = processTransactionList;
 
 function getIsTransactionAlreadyPosted(
   previousTransactionList,
