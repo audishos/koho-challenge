@@ -6,7 +6,7 @@
   "scripts": {
     "load-funds": "node index",
     "debug": "node --inspect-brk index",
-    "test": "node node_modules/.bin/jest",
+    "test": "jest",
     "test-debug": "node --inspect-brk node_modules/.bin/jest"
   },
   "keywords": [],
