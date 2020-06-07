@@ -27,10 +27,8 @@ function parseTransactionsFile(filePath) {
           transaction.load_amount.replace('$', '')
         );
 
-        const date = new Date(transaction.time);
-        date.setUTCHours(0, 0, 0, 0);
-        transaction.time = date.getTime();
-        
+        transaction.time = getDateInMillis(transaction.time);
+
         return transaction;
       })
       .filter(x => x)
@@ -40,3 +38,9 @@ function parseTransactionsFile(filePath) {
 }
 
 module.exports = parseTransactionsFile;
+
+function getDateInMillis(dateString) {
+  const date = new Date(dateString);
+  date.setUTCHours(0, 0, 0, 0);
+  return date.getTime();
+}
