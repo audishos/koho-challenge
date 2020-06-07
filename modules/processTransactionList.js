@@ -52,7 +52,7 @@ function processTransactionList(transactionList = []) {
 
     const customerTransactionsInLastWeek = previousTransactionsForCustomer.slice(
       weekStartIndex,
-      i - 1
+      i
     );
 
     if (
@@ -72,7 +72,7 @@ function processTransactionList(transactionList = []) {
 
     const customerTransactionsInLastDay = customerTransactionsInLastWeek.slice(
       dayStartIndex,
-      i - 1
+      i
     );
 
     if (dayStartIndex < 0) {
