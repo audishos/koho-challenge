@@ -6,4 +6,6 @@ module.exports = {
   DAILY_LOAD_COUNT_LIMIT: 3,
   MILLISECONDS_PER_DAY,
   MILLISECONDS_PER_WEEK: MILLISECONDS_PER_DAY * 7,
+  INPUT_PATH: './takehome/input.txt',
+  OUTPUT_PATH: './output/output.txt',
 };
