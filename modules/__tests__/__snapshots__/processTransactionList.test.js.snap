@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`processTransactionList.test should match the results snapshot 1`] = `
+Array [
+  Object {
+    "accepted": true,
+    "customer_id": "1",
+    "id": "1",
+  },
+  Object {
+    "accepted": true,
+    "customer_id": "1",
+    "id": "2",
+  },
+  Object {
+    "accepted": true,
+    "customer_id": "1",
+    "id": "3",
+  },
+  Object {
+    "accepted": false,
+    "customer_id": "1",
+    "id": "4",
+  },
+  Object {
+    "accepted": false,
+    "customer_id": "8",
+    "id": "420",
+  },
+  Object {
+    "accepted": true,
+    "customer_id": "40",
+    "id": "666",
+  },
+  Object {
+    "accepted": true,
+    "customer_id": "40",
+    "id": "675",
+  },
+  Object {
+    "accepted": false,
+    "customer_id": "40",
+    "id": "675",
+  },
+  Object {
+    "accepted": false,
+    "customer_id": "40",
+    "id": "686",
+  },
+  Object {
+    "accepted": true,
+    "customer_id": "123",
+    "id": "728",
+  },
+  Object {
+    "accepted": true,
+    "customer_id": "123",
+    "id": "734",
+  },
+  Object {
+    "accepted": true,
+    "customer_id": "123",
+    "id": "756",
+  },
+  Object {
+    "accepted": true,
+    "customer_id": "123",
+    "id": "757",
+  },
+  Object {
+    "accepted": false,
+    "customer_id": "123",
+    "id": "758",
+  },
+  Object {
+    "accepted": true,
+    "customer_id": "5",
+    "id": "1025",
+  },
+]
+`;
