@@ -12,12 +12,37 @@ function processTransactionList(transactionList = []) {
   const pushResult = (accepted, { id, customer_id }) =>
     resultList.push({ id, customer_id, accepted });
 
+  const validationChecks = [
+    checkLoadAmountExceedsDailyLimit,
+    checkCustomerHasPreviousTransactions,
+    checkIsDuplicateTransaction,
+    checkCustomerHasPreviousTransactionsInLastWeek,
+    checkIsWeeklyLoadAmountLimitExceeded,
+    checkCustomerHasPreviosTransactionsInLastDay,
+    checkIsDailyTransactionCountLimitExceeded,
+    checkIsDailyLoadAmountLimitExceeded,
+    ({ transaction, processed }) => !processed && pushResult(true, transaction),
+  ];
+
   transactionList.forEach((transaction, i) => {
+    validationChecks.reduce((x, f) => f(x), { transaction, i });
+  });
+
+  return resultList;
+
+  // Validation check reducer functions
+  function checkLoadAmountExceedsDailyLimit({ transaction, i }) {
+    let processed = false;
     if (transaction.load_amount > DAILY_AMOUNT_LIMIT) {
       pushResult(false, transaction);
-      return;
+      processed = true;
     }
+    return { transaction, i, processed };
+  }
 
+  function checkCustomerHasPreviousTransactions({ transaction, i, processed }) {
+    if (processed) return { processed };
+    let _processed = processed;
     const previousTransactionsForCustomer = transactionList
       .slice(0, i || 1 - 1)
       .filter(
@@ -28,9 +53,24 @@ function processTransactionList(transactionList = []) {
 
     if (previousTransactionsForCustomer.length < 1) {
       pushResult(true, transaction);
-      return;
+      _processed = true;
     }
+    return {
+      transaction,
+      i,
+      previousTransactionsForCustomer,
+      processed: _processed,
+    };
+  }
 
+  function checkIsDuplicateTransaction({
+    transaction,
+    i,
+    previousTransactionsForCustomer,
+    processed,
+  }) {
+    if (processed) return { processed };
+    let _processed = processed;
     if (
       getIsTransactionAlreadyPosted(
         previousTransactionsForCustomer,
@@ -38,18 +78,50 @@ function processTransactionList(transactionList = []) {
       )
     ) {
       pushResult(false, transaction);
-      return;
+      _processed = true;
     }
+    return {
+      transaction,
+      i,
+      previousTransactionsForCustomer,
+      processed: _processed,
+    };
+  }
 
+  function checkCustomerHasPreviousTransactionsInLastWeek({
+    transaction,
+    i,
+    previousTransactionsForCustomer,
+    processed,
+  }) {
+    if (processed) return { processed };
+    let _processed = processed;
     const weekStartIndex = previousTransactionsForCustomer.findIndex(
       x => transaction.time - x.time < MILLISECONDS_PER_WEEK
     );
 
     if (weekStartIndex < 0) {
       pushResult(true, transaction);
-      return;
+      _processed = true;
     }
+    return {
+      transaction,
+      i,
+      previousTransactionsForCustomer,
+      weekStartIndex,
+      processed: _processed,
+    };
+  }
 
+  function checkIsWeeklyLoadAmountLimitExceeded({
+    transaction,
+    i,
+    previousTransactionsForCustomer,
+    weekStartIndex,
+    processed,
+  }) {
+    if (processed) return { processed };
+    let _processed = processed;
     const customerTransactionsInLastWeek = previousTransactionsForCustomer.slice(
       weekStartIndex,
       i
@@ -63,9 +135,24 @@ function processTransactionList(transactionList = []) {
       )
     ) {
       pushResult(false, transaction);
-      return;
+      _processed = true;
     }
+    return {
+      transaction,
+      i,
+      customerTransactionsInLastWeek,
+      processed: _processed,
+    };
+  }
 
+  function checkCustomerHasPreviosTransactionsInLastDay({
+    transaction,
+    i,
+    customerTransactionsInLastWeek,
+    processed,
+  }) {
+    if (processed) return { processed };
+    let _processed = processed;
     const dayStartIndex = customerTransactionsInLastWeek.findIndex(
       x => transaction.time - x.time < MILLISECONDS_PER_DAY
     );
@@ -77,14 +164,44 @@ function processTransactionList(transactionList = []) {
 
     if (dayStartIndex < 0) {
       pushResult(true, transaction);
-      return;
+      _processed = true;
     }
+    return {
+      transaction,
+      i,
+      customerTransactionsInLastDay,
+      processed: _processed,
+    };
+  }
 
+  function checkIsDailyTransactionCountLimitExceeded({
+    transaction,
+    i,
+    customerTransactionsInLastDay,
+    processed,
+  }) {
+    if (processed) return { processed };
+    let _processed = processed;
     if (customerTransactionsInLastDay.length + 1 > DAILY_LOAD_COUNT_LIMIT) {
       pushResult(false, transaction);
-      return;
+      _processed = true;
     }
+    return {
+      transaction,
+      i,
+      customerTransactionsInLastDay,
+      processed: _processed,
+    };
+  }
 
+  function checkIsDailyLoadAmountLimitExceeded({
+    transaction,
+    i,
+    customerTransactionsInLastDay,
+    processed,
+  }) {
+    if (processed) return { processed };
+    let _processed = processed;
     if (
       getIsLoadAmountLimitExceeded(
         customerTransactionsInLastDay,
@@ -93,17 +210,20 @@ function processTransactionList(transactionList = []) {
       )
     ) {
       pushResult(false, transaction);
-      return;
+      _processed = true;
     }
-
-    pushResult(true, transaction);
-  });
-
-  return resultList;
+    return {
+      transaction,
+      i,
+      customerTransactionsInLastDay,
+      processed: _processed,
+    };
+  }
 }
 
 module.exports = processTransactionList;
 
+// Helper functions
 function getIsTransactionAlreadyPosted(
   previousTransactionList,
   currentTransaction
